@@ -6,23 +6,44 @@ import { Form, FormProps, Modal } from 'antd';
 import { useState } from 'react';
 import ButtonUI from './styled/button';
 import InputUI from './styled/input';
+import loginApi from '@/api/login-api';
+import { useRouter } from 'next/navigation';
 
 type FieldType = {
-    password?: string;
-    email?: string
+    password: string;
+    email: string
 };
 
-const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
-    console.log('Success:', values);
-};
 
 const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
 };
 
-export default function LoginForm() {
+const LoginForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const router = useRouter()
+    const onFinish: FormProps<FieldType>['onFinish'] = async (params: {
+        email: string,
+        password: string
+    }) => {
+        try {
+            const response = await loginApi.login({
+                email: params.email,
+                password: params.password
+            });
+            console.log('Success:', response);
+            // Save user information to localStorage
+            localStorage.setItem('user', JSON.stringify(response));
+            // Redirect to dashboard
+            return router.push('/dashboard');
+        } catch (error) {
+            console.error('Failed:', error);
+            // Handle login error
+        }
+    };
+
 
     const [open, setOpen] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
@@ -146,3 +167,4 @@ export default function LoginForm() {
     );
 }
 
+export default LoginForm;

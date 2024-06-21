@@ -1,11 +1,11 @@
 
 import { IUserDetails, LoginRequest } from '@/models/api/login-api'
-import axiosClient from './axios-client'
+import axios from 'axios'
 
 const loginApi = {
   login(data: LoginRequest): Promise<IUserDetails> {
     const url = '/auth/login'
-    return axiosClient.post(url, data)
+    return axios.post(url, data)
   },
 
   refreshToken(refreshToken: string): Promise<IUserDetails> {
@@ -13,7 +13,7 @@ const loginApi = {
       headers: { 'refresh-token': refreshToken },
     }
     const url = '/auth/refresh-token/'
-    return axiosClient.post(url, {}, config)
+    return axios.post(url, {}, config)
   },
 }
 

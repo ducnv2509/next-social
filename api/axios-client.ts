@@ -1,37 +1,36 @@
-/* eslint-disable */
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios from 'axios';
+import loginApi from './login-api';
 
-const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACK_END_DOMAIN,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
+const axiosInstance = axios.create();
 
-// Add a request interceptor
-axiosClient.interceptors.request.use(
-  function (config: AxiosRequestConfig) {
-    // Do something before request is sent
-    return config
-  },
-  function (error) {
-    // Do something with request error
-    return Promise.reject(error)
+axiosInstance.interceptors.request.use(async (config) => {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user) {
+    const accessToken = user.accessToken;
+    const refreshTokenValue = user.refreshToken;
+
+    const isTokenExpired = (token: string) => {
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      return decoded.exp * 1000 < Date.now();
+    };
+
+    if (isTokenExpired(accessToken)) {
+      try {
+        const newAccessToken = await loginApi.refreshToken(refreshTokenValue);
+        localStorage.setItem('user', JSON.stringify(user));
+        config.headers['token'] = `${newAccessToken.accessToken}`;
+      } catch (error) {
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+    } else {
+      config.headers['token'] = `${accessToken}`;
+    }
   }
-)
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
-// Add a response interceptor
-axiosClient.interceptors.response.use(
-  function (response: AxiosResponse) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    return response.data
-  },
-  function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    return Promise.reject(error)
-  }
-)
-
-export default axiosClient
+export default axiosInstance;

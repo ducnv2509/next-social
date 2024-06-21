@@ -67,9 +67,11 @@ export default function Headers() {
                 />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', paddingRight: '24px' }}>
-                <Badge count={11}>
+                <div className="relative">
                     <BellOutlined style={{ fontSize: '20px', marginRight: '24px', color: 'white' }} />
-                </Badge>
+                    <Badge count={11} className="absolute top-1/4 right-1" style={{ fontSize: 11 }}>
+                    </Badge>
+                </div>
                 <Dropdown menu={{ items }} placement="bottomRight" className="ml-5">
                     <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                         <Avatar icon={<UserOutlined />} />
