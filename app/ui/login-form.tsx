@@ -1,13 +1,12 @@
 'use client';
 
+import loginApi from '@/api/login-api';
 import { Form, FormProps, Modal } from 'antd';
-// import InputUI from './styled/input';
-// import ButtonUI from './styled/button';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import ButtonUI from './styled/button';
 import InputUI from './styled/input';
-import loginApi from '@/api/login-api';
-import { useRouter } from 'next/navigation';
+import useAuthStore from '@/zustand/authStore';
 
 type FieldType = {
     password: string;
@@ -20,9 +19,7 @@ const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
 };
 
 const LoginForm = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
+    const setUser = useAuthStore((state) => state.setUser);
     const router = useRouter()
     const onFinish: FormProps<FieldType>['onFinish'] = async (params: {
         email: string,
@@ -31,16 +28,14 @@ const LoginForm = () => {
         try {
             const response = await loginApi.login({
                 email: params.email,
-                password: params.password
+                password: params.password,
             });
             console.log('Success:', response);
-            // Save user information to localStorage
-            localStorage.setItem('user', JSON.stringify(response));
-            // Redirect to dashboard
+            // Lưu thông tin người dùng vào Zustand store
+            setUser(response);
             return router.push('/dashboard');
         } catch (error) {
             console.error('Failed:', error);
-            // Handle login error
         }
     };
 
@@ -92,9 +87,7 @@ const LoginForm = () => {
                     >
                         <InputUI
                             type="email"
-                            value={email}
                             placeholder='Nhập email'
-                            onChange={(e) => setEmail(e.target.value)}
                             className='rounded-none'
                             required
                         />
@@ -107,9 +100,7 @@ const LoginForm = () => {
                     >
                         <InputUI
                             type="password"
-                            value={password}
                             placeholder='Nhập mật khẩu'
-                            onChange={(e) => setPassword(e.target.value)}
                             className='rounded-none'
                             required
                         />
@@ -145,9 +136,7 @@ const LoginForm = () => {
                                 >
                                     <InputUI
                                         type="email"
-                                        value={email}
                                         placeholder='Nhập email'
-                                        onChange={(e) => setEmail(e.target.value)}
                                         className='rounded-none'
                                         required
                                     />
